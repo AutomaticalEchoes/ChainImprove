@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.automaticalechoes.chainimprove.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "refmap": "mod.refmap.json",
+  "plugin": "com.automaticalechoes.chainimprove.mixin.MixinPlugin",
+  "mixins": [
+    "BoatMixin",
+    "ChainBlockMixin",
+    "FenceBlockMixin"
+  ],
+  "client": [
+    "BoatRenderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
