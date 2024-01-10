@@ -121,10 +121,12 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 
     @Override
     public void handleStartJump(int p_21695_) {
+
     }
 
     @Override
     public void handleStopJump() {
+
     }
 
     @Override
@@ -153,12 +155,14 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
                 }
 
             }
-            double f = 0.06D + length / 100 + (v2 - v1) / 10;
+            double f = 0.06D + length / 100 + (v2 - v1) / 4;
             Vec3 v = subtract.normalize().scale(f);
             if(subtract.horizontalDistance() > 4) {
-                float yRotNeo = -(float) (Mth.atan2(subtract.x, subtract.z) * (double) (180F / (float) Math.PI));
-                float yRot = this.getYRot();
-                this.setYRot(yRot + (yRotNeo - yRot) / 10);
+                float yRotNeo =  (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+                if(this.getYRot() != yRotNeo){
+                    float yRot = this.getYRot();
+                    this.setYRot(yRot + (yRotNeo - yRot) / 10);
+                }
             }
 
             this.setDeltaMovement(getDeltaMovement().add(v));
@@ -180,8 +184,15 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
             chainBreak(false);
             return;
         }
-        if(node == null && this.nodeUuid != null)
-            this.setNode(ChainNode.searchEntity(level(),this, nodeUuid));
+        if(node == null && this.nodeUuid != null) {
+            Entity entity = ChainNode.searchEntity(level(), this, nodeUuid);
+            if(entity == null) {
+                resetNode();
+            }else {
+                this.setNode(entity);
+            }
+        }
+
     }
 
     public void chainBreak(boolean shouldNodePlaySound){

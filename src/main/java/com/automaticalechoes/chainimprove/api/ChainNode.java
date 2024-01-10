@@ -80,7 +80,7 @@ public interface ChainNode {
 
     @Nullable
     static Entity searchEntity(Level level, Entity thos, UUID uuid){
-        List<Entity> entitiesOfClass = level.getEntitiesOfClass(Entity.class, thos.getBoundingBox().inflate(7.0D), entity -> entity != thos);
+        List<Entity> entitiesOfClass = level.getEntitiesOfClass(Entity.class, thos.getBoundingBox().inflate(24.0D), entity -> entity != thos);
         for(Entity entity : entitiesOfClass) {
             if(entity.getUUID().equals(uuid)) return entity;
         }
