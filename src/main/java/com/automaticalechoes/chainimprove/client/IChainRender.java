@@ -57,7 +57,7 @@ public class IChainRender {
         if(cross){
             vec3 = vec3.cross(vector);
         }
-        vec3 = vec3.normalize().scale(0.1);
+        vec3 = vec3.normalize().scale(0.2);
         vertex(vertexconsumer, matrix4f, matrix3f, (float)(x - vec3.x), (float)(y - vec3.y), (float)(z - vec3.z),0,0);
         vertex(vertexconsumer, matrix4f, matrix3f, (float)(x + vec3.x), (float)(y + vec3.y), (float)(z + vec3.z),1.0F,0);
         vertex(vertexconsumer, matrix4f, matrix3f, (float)(x1 - vec3.x), (float)(y1 - vec3.y), (float)(z1 - vec3.z),0,1.0F);

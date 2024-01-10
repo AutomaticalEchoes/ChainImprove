@@ -72,6 +72,14 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
         }
     }
 
+    @Override
+    public void kill() {
+        super.kill();
+        if(node != null){
+            chainBreak(false);
+        }
+    }
+
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo callbackInfo){
         if(level().isClientSide)
