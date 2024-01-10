@@ -187,7 +187,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
         if(node == null && this.nodeUuid != null) {
             Entity entity = ChainNode.searchEntity(level(), this, nodeUuid);
             if(entity == null) {
-                resetNode();
+                chainBreak(false);
             }else {
                 this.setNode(entity);
             }
