@@ -29,21 +29,11 @@ public class ChainImprove
     public ChainImprove()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::RegistryEventL);
+        ResourceLocation key = ForgeRegistries.ITEMS.getKey(Items.CHAIN);
+        ChainBlockItem.CHAIN_OVERRIDE.builtInRegistryHolder().bindValue(ChainBlockItem.CHAIN_OVERRIDE);
+        ForgeRegistries.ITEMS.register(key, ChainBlockItem.CHAIN_OVERRIDE);
         ENTITY_TYPES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    @SubscribeEvent
-    public  void RegistryEventL(RegisterEvent event){
-        if(event.getRegistryKey().equals(ForgeRegistries.Keys.ITEMS)){
-            if(event.getForgeRegistry() instanceof ForgeRegistry forgeRegistry){
-                ResourceLocation key = forgeRegistry.getKey(Items.CHAIN);
-                ChainBlockItem.CHAIN_OVERRIDE.builtInRegistryHolder().bindValue(ChainBlockItem.CHAIN_OVERRIDE);
-                forgeRegistry.register(key, ChainBlockItem.CHAIN_OVERRIDE);
-            }
-
-        }
     }
 
 
