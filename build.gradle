@@ -23,7 +23,7 @@ mixin {
     debug.export = true
 }
 
-version = '0.1.2_forge-1.18-38.0.17'
+version = '0.1.3_forge-1.18-38.0.17'
 group = 'com.automaticalechoes' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'chainimprove'
 
