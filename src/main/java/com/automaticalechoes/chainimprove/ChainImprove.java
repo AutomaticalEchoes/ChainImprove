@@ -2,6 +2,7 @@ package com.automaticalechoes.chainimprove;
 
 import com.automaticalechoes.chainimprove.api.ChainBlockItem;
 import com.automaticalechoes.chainimprove.common.ChainKnotEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -29,11 +30,17 @@ public class ChainImprove
     public ChainImprove()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(Items.CHAIN);
-        ChainBlockItem.CHAIN_OVERRIDE.builtInRegistryHolder().bindValue(ChainBlockItem.CHAIN_OVERRIDE);
-        ForgeRegistries.ITEMS.register(key, ChainBlockItem.CHAIN_OVERRIDE);
         ENTITY_TYPES.register(modEventBus);
+        modEventBus.addListener(this::OnRegistry);
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    public void OnRegistry(RegisterEvent event){
+        if(event.getRegistryKey().equals(ForgeRegistries.Keys.ITEMS)){
+            ResourceLocation key = ForgeRegistries.ITEMS.getKey(Items.CHAIN);
+            ChainBlockItem.CHAIN_OVERRIDE.builtInRegistryHolder().bindValue(ChainBlockItem.CHAIN_OVERRIDE);
+            ForgeRegistries.ITEMS.register(key, ChainBlockItem.CHAIN_OVERRIDE);
+        }
     }
 
 
