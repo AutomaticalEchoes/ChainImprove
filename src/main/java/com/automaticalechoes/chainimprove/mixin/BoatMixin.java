@@ -12,10 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.PlayerRideableJumping;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
@@ -169,7 +166,8 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
                 float yRotNeo =  (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
                 if(this.getYRot() != yRotNeo){
                     float yRot = this.getYRot();
-                    this.setYRot(yRot + (yRotNeo - yRot) / 10);
+                    float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
+                    this.setYRot(yRot + rot);
                 }
             }
 
@@ -228,6 +226,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
         this.nodeUuid = entity != null ? entity.getUUID() : null;
         this.entityData.set(NODE_ID, entity != null ? entity.getId() : Integer.MIN_VALUE);
     }
+
 
     @Override
     public @Nullable Entity getNode() {
