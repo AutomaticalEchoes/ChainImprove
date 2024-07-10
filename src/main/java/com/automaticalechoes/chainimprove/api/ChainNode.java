@@ -1,7 +1,6 @@
 package com.automaticalechoes.chainimprove.api;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +21,7 @@ public interface ChainNode {
     void setNodeUuid(UUID uuid);
     UUID getNodeUuid();
     void setNode(Entity node);
-    Entity getNode();
+    Entity getChainedNode();
     void resetNode();
 
     default void chainTo(@Nonnull Entity entity){
@@ -36,20 +35,20 @@ public interface ChainNode {
     }
 
     default void writeNode(CompoundTag compoundTag){
-        if(this.getNode() != null){
-            compoundTag.putUUID(NODE_UUID,this.getNode().getUUID());
+        if(this.getChainedNode() != null){
+            compoundTag.putUUID(NODE_UUID,this.getChainedNode().getUUID());
         }
     }
 
     default boolean interactNode(Player p_38330_, InteractionHand p_38331_, Entity thos) {
         ItemStack itemInHand = p_38330_.getItemInHand(p_38331_);
         boolean validItem = itemInHand.isEmpty() || itemInHand.is(Items.CHAIN);
-        if(this.getNode() != null && ((this.getNode() == p_38330_ && validItem) || itemInHand.is(Items.SHEARS))){
+        if(this.getChainedNode() != null && ((this.getChainedNode() == p_38330_ && validItem) || itemInHand.is(Items.SHEARS))){
             resetNode();
             thos.playSound(SoundEvents.CHAIN_BREAK);
             thos.spawnAtLocation(Items.CHAIN);
             return true;
-        }else if(this.getNode() == null){
+        }else if(this.getChainedNode() == null){
             if(validItem && ChainNode.bindChainedNode(p_38330_,p_38330_.level(),thos)){
                 return true;
             }else if(itemInHand.is(Items.CHAIN)) {
@@ -74,7 +73,7 @@ public interface ChainNode {
 
     static List<Entity> getChainedEntityOfNode(Entity node, Level p_42831_){
         return p_42831_.getEntitiesOfClass(Entity.class, node.getBoundingBox().inflate(7.0D), NODE_PREDICATE)
-                .stream().filter(entity -> entity != node && ((ChainNode)entity).getNode() == node)
+                .stream().filter(entity -> entity != node && ((ChainNode)entity).getChainedNode() == node)
                 .toList();
     }
 

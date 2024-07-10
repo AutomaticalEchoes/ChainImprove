@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Mixin(Boat.class)
@@ -34,7 +35,6 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
     @Shadow public abstract void lerpTo(double p_38299_, double p_38300_, double p_38301_, float p_38302_, float p_38303_, int p_38304_, boolean p_38305_);
 
     @Shadow public abstract void tick();
-
     private static final EntityDataAccessor<Integer> NODE_ID = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
     private @Nullable Entity node;
     private @Nullable UUID nodeUuid;
@@ -86,6 +86,13 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
         NodePull();
 //        IRot(this.getDeltaMovement());
     }
+
+    @Inject(method = "tick" ,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;floatBoat()V", shift = At.Shift.AFTER))
+    public void beforeMove(CallbackInfo callbackInfo){
+
+    }
+
 
     @Override
     protected Vec3 getLeashOffset() {
@@ -143,37 +150,66 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
     public void setNodeUuid(UUID uuid) {
         this.nodeUuid = uuid;
     }
-
     public void NodePull(){
         if(node != null){
             Vec3 subtract = this.node.position().subtract(this.position());
             double length = subtract.length();
-            double v1 = this.getDeltaMovement().length();
-            double v2 = node.getDeltaMovement().length();
-            if(length < 5) return;
-            if(!this.level().isClientSide && length > 24 + 12 * v2){
-                if(v2 > 1.5){
+            Vec3 vec = subtract.normalize();
+            if(length < 2) return;
+            Vec3 nodeVec = node.getDeltaMovement();
+            double v1 = nodeVec.length();
+            double cos = nodeVec.dot(vec) /(length * v1);
+            if(!this.level().isClientSide ){
+                if(length > 24){
                     chainBreak(true);
                     return;
                 }else {
                     node.addDeltaMovement(node.getDeltaMovement().scale(- 0.1));
                 }
-
             }
-            double f = 0.06D + length / 100 + (v2 - v1) / 4;
-            Vec3 v = subtract.normalize().scale(f);
-            if(subtract.horizontalDistance() > 4) {
-                float yRotNeo =  (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+            double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
+            Vec3 v = vec.scale(f);
+            if(subtract.horizontalDistance() > 1) {
+                float yRotNeo = (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
                 if(this.getYRot() != yRotNeo){
                     float yRot = this.getYRot();
                     float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
                     this.setYRot(yRot + rot);
                 }
             }
-
-            this.setDeltaMovement(getDeltaMovement().add(v));
+            this.setDeltaMovement(v);
         }
     }
+//    public void NodePull(){
+//        if(node != null){
+//            Vec3 subtract = this.node.position().subtract(this.position());
+//            double length = subtract.length();
+//            double v1 = this.getDeltaMovement().length();
+//            double v2 = node.getDeltaMovement().length();
+//            if(length < 1) return;
+//            if(!this.level().isClientSide && length > 24 + 12 * v2){
+//                if(v2 > 1.5){
+//                    chainBreak(true);
+//                    return;
+//                }else {
+//                    node.addDeltaMovement(node.getDeltaMovement().scale(- 0.1));
+//                }
+//
+//            }
+//            double f = 0.06D + length / 100 + (v2 - v1) ;
+//            Vec3 v = subtract.normalize().scale(f);
+//            if(subtract.horizontalDistance() > 4) {
+//                float yRotNeo =  (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+//                if(this.getYRot() != yRotNeo){
+//                    float yRot = this.getYRot();
+//                    float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
+//                    this.setYRot(yRot + rot);
+//                }
+//            }
+//
+//            this.setDeltaMovement(getDeltaMovement().add(v));
+//        }
+//    }
 
     public void ClientNodeTick(){
         int id = entityData.get(NODE_ID);
@@ -229,7 +265,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 
 
     @Override
-    public @Nullable Entity getNode() {
+    public @Nullable Entity getChainedNode() {
         return this.node;
     }
     //    public void IRot(Vec3 p_20034_) {

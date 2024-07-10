@@ -141,7 +141,7 @@ public class ChainKnotEntity extends HangingEntity implements ChainNode {
     }
 
     @Override
-    public Entity getNode() {
+    public Entity getChainedNode() {
         return null;
     }
 
