@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 @Mixin(Boat.class)
-public abstract class BoatMixin extends Entity implements ChainNode, PlayerRideableJumping {
+public abstract class BoatMixin extends Entity implements ChainNode {
     @Shadow public abstract void lerpTo(double p_38299_, double p_38300_, double p_38301_, float p_38302_, float p_38303_, int p_38304_, boolean p_38305_);
 
     @Shadow public abstract void tick();
@@ -100,41 +100,6 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 //        float f = Mth.lerp(p_36374_ * 0.5F, this.getXRot(), this.xRotO) * ((float)Math.PI / 180F);
         float f1 = Mth.lerp(p_36374_, this.yRotO, this.getYRot()) * ((float)Math.PI / 180F);
         return this.getPosition(p_36374_).add(new Vec3(0.0D, (double)this.getBbHeight() * 0.5D, - this.getBbWidth() * 0.6F).yRot(-f1));
-    }
-
-    protected void executeRidersJump(float p_248808_) {
-        double vecMut = 2;
-        double minJump = 0.45D;
-        if(this.onGround()){
-            vecMut = 0.5;
-            minJump = 0.35D;
-        }
-        Vec3 vec3 = this.getDeltaMovement();
-        double v = vec3.horizontalDistance() * vecMut;
-        double d1 = Math.max(Math.min(v, 1.0D), minJump) * p_248808_;
-        this.setDeltaMovement(vec3.x, d1, vec3.z);
-        this.hasImpulse = true;
-    }
-
-
-    @Override
-    public void onPlayerJump(int p_30591_) {
-        executeRidersJump(p_30591_ / 100.0F);
-    }
-
-    @Override
-    public boolean canJump() {
-        return this.isInWater() || this.onGround();
-    }
-
-    @Override
-    public void handleStartJump(int p_21695_) {
-
-    }
-
-    @Override
-    public void handleStopJump() {
-
     }
 
     @Override

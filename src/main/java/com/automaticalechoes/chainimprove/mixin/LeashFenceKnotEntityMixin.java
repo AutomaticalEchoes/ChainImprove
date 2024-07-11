@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 @Mixin(LeashFenceKnotEntity.class)
 public abstract class LeashFenceKnotEntityMixin extends HangingEntity implements ILeashFenceKnotEntity {
-    private static final Predicate<Entity> KNOTABLE_PREDICATE = entity -> entity instanceof ChainNode|| entity instanceof Mob;
+
     private static final String SIZE = "knot_size";
     private static final EntityDataAccessor<Integer> KNOT_SIZE = SynchedEntityData.defineId(LeashFenceKnotEntity.class, EntityDataSerializers.INT);
 
@@ -75,7 +75,7 @@ public abstract class LeashFenceKnotEntityMixin extends HangingEntity implements
      * @reason change the rule, easier to add leading entities.
      * 1.let all the player leading entities leash to this.
      * 2.let all leading entities leash to player if shift key down.
-     * 3.Except for those 2  situations, nothing will happen.
+     * 3.nothing happen Except for those 2 situations.
      * now, if u want let only one entity leash to u, should interact the target entity (must leading by knot entity) with empty item in main hand.
      */
     @Overwrite
@@ -83,32 +83,16 @@ public abstract class LeashFenceKnotEntityMixin extends HangingEntity implements
         if (this.level().isClientSide) {
             return InteractionResult.SUCCESS;
         } else if(p_31842_.isShiftKeyDown()){
-            kont_size -= fromALeash2B(this,p_31842_);
+            kont_size -= ILeashFenceKnotEntity.fromALeash2B(this,p_31842_);
             this.discard();
             return InteractionResult.SUCCESS;
         }else{
-            kont_size += fromALeash2B(p_31842_,this);
+            kont_size += ILeashFenceKnotEntity.fromALeash2B(p_31842_,this);
             return InteractionResult.SUCCESS;
         }
     }
 
-    public int fromALeash2B(Entity entityA, Entity entityB){
-        if (this.level().isClientSide) return 0;
-        int i = 0;
-        List<Entity> list = this.level().getEntitiesOfClass(Entity.class, entityA.getBoundingBox().inflate(7.0D), KNOTABLE_PREDICATE)
-                .stream().toList();
-        for (Entity entity1 : list) {
-            if(entity1 == this) return 0;
-            if(entity1 instanceof Mob mob && mob.getLeashHolder() == this){
-                mob.setLeashedTo(entityB, true);
-                i ++;
-            }else if(entity1 instanceof ChainNode node && node.getChainedNode() == this){
-                node.chainTo(entityB);
-                i ++;
-            }
-        }
-        return i;
-    }
+
 
 }
 

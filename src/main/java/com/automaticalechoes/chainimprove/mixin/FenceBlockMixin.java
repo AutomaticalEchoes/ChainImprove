@@ -1,11 +1,9 @@
 package com.automaticalechoes.chainimprove.mixin;
 
-import com.automaticalechoes.chainimprove.api.ChainNode;
+import com.automaticalechoes.chainimprove.api.ILeashFenceKnotEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -14,34 +12,23 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
+import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(FenceBlock.class)
 public class FenceBlockMixin {
-    @Inject(method = "use" , at = @At("HEAD"), cancellable = true)
-    public void use(BlockState p_53316_, Level level, BlockPos blockpos, Player player, InteractionHand p_53320_, BlockHitResult p_53321, CallbackInfoReturnable<InteractionResult> callbackInfoReturnable){
-        if(level.isClientSide){
-            ItemStack itemInHand = player.getItemInHand(p_53320_);
-            callbackInfoReturnable.setReturnValue(itemInHand.isEmpty() || itemInHand.is(Items.CHAIN) ? InteractionResult.SUCCESS : InteractionResult.PASS);
-        }else{
-            callbackInfoReturnable.setReturnValue(chainImprove$bindNode(level, blockpos, player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
+    /**
+     * @author Automaticalechoes
+     * @reason change rule same with knot entity
+     * {@link LeashFenceKnotEntityMixin#interact(Player, InteractionHand)}
+     */
+    @Overwrite
+    public InteractionResult  use(BlockState p_53316_, Level level, BlockPos blockpos, Player player, InteractionHand p_53320_, BlockHitResult p_53321){
+        if (level.isClientSide) {
+            ItemStack itemstack = player.getItemInHand(p_53320_);
+            return itemstack.is(Items.LEAD) || itemstack.is(Items.CHAIN) || itemstack.isEmpty() ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        } else {
+            int i = ILeashFenceKnotEntity.fromALeash2Neo(player, blockpos);
+            return i != 0 ? InteractionResult.SUCCESS: InteractionResult.CONSUME;
         }
-
-    }
-
-    @Unique
-    public boolean chainImprove$bindNode(Level level, BlockPos blockpos, Player player){
-        List<Entity> chainedEntityOfNode = ChainNode.getChainedEntityOfNode(player, level);
-        for (Entity entity : chainedEntityOfNode) {
-//            ChainKnotEntity chainKnot = ChainKnotEntity.getOrCreateChainKnot(level, blockpos);
-            LeashFenceKnotEntity knot = LeashFenceKnotEntity.getOrCreateKnot(level, blockpos);
-            ((ChainNode)entity).chainTo(knot);
-        }
-        return !chainedEntityOfNode.isEmpty();
     }
 }
