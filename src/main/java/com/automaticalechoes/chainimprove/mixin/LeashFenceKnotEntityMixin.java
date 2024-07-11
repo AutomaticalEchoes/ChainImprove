@@ -1,26 +1,35 @@
 package com.automaticalechoes.chainimprove.mixin;
 
 import com.automaticalechoes.chainimprove.api.ChainNode;
+import com.automaticalechoes.chainimprove.api.ILeashFenceKnotEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(LeashFenceKnotEntity.class)
-public abstract class LeashFenceKnotEntityMixin extends HangingEntity {
-    static final Predicate<Entity> KNOTABLE_PREDICATE = entity -> entity instanceof ChainNode|| entity instanceof Mob;
-    protected static final String SIZE = "knot_size";
-    protected static final EntityDataAccessor<Integer> KNOT_SIZE = SynchedEntityData.defineId(LeashFenceKnotEntity.class, EntityDataSerializers.INT);
+public abstract class LeashFenceKnotEntityMixin extends HangingEntity implements ILeashFenceKnotEntity {
+    private static final Predicate<Entity> KNOTABLE_PREDICATE = entity -> entity instanceof ChainNode|| entity instanceof Mob;
+    private static final String SIZE = "knot_size";
+    private static final EntityDataAccessor<Integer> KNOT_SIZE = SynchedEntityData.defineId(LeashFenceKnotEntity.class, EntityDataSerializers.INT);
 
     protected Integer kont_size = 0;
     protected LeashFenceKnotEntityMixin(EntityType<? extends HangingEntity> p_31703_, Level p_31704_) {
@@ -30,7 +39,7 @@ public abstract class LeashFenceKnotEntityMixin extends HangingEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(KNOT_SIZE, 0);
+        this.entityData.define(KNOT_SIZE, 1);
     }
 
     @Override
@@ -46,6 +55,12 @@ public abstract class LeashFenceKnotEntityMixin extends HangingEntity {
     }
 
     @Override
+    public void shrunk() {
+        kont_size --;
+        if(kont_size <=0) this.discard();
+    }
+
+    @Override
     public int getWidth() {
         return (9 + kont_size) / 12 + 9;
     }
@@ -55,58 +70,44 @@ public abstract class LeashFenceKnotEntityMixin extends HangingEntity {
         return 3 + Math.min(kont_size, 9);
     }
 
-
-    @Override
-    public void playPlacementSound() {
-
+    /**
+     * @author AutomaticalEchoes
+     * @reason change the rule, easier to add leading entities.
+     * 1.let all the player leading entities leash to this.
+     * 2.let all leading entities leash to player if shift key down.
+     * 3.Except for those 2  situations, nothing will happen.
+     * now, if u want let only one entity leash to u, should interact the target entity (must leading by knot entity) with empty item in main hand.
+     */
+    @Overwrite
+    public @NotNull InteractionResult interact(Player p_31842_, InteractionHand p_31843_) {
+        if (this.level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        } else if(p_31842_.isShiftKeyDown()){
+            kont_size -= fromALeash2B(this,p_31842_);
+            this.discard();
+            return InteractionResult.SUCCESS;
+        }else{
+            kont_size += fromALeash2B(p_31842_,this);
+            return InteractionResult.SUCCESS;
+        }
     }
 
-//    public boolean merge(Level level, Entity player){
-//        if(this.level().isClientSide ) return false;
-//        boolean flag = false;
-//        List<Entity> list = this.level().getEntitiesOfClass(Entity.class, player.getBoundingBox().inflate(7.0D), KNOTABLE_PREDICATE)
-//                .stream().filter(entity -> entity != player).toList();
-//        for(Entity entity : list) {
-//            if(kont_size >= 24) return false;
-//            else if (entity instanceof Mob mob && mob.getLeashHolder() == player) {
-//                mob.setLeashedTo(this, true);
-//                kont_size++;
-//                flag = true;
-//            }else if (entity instanceof ChainNode node && node.getNode() == player){
-//                node.chainTo(this);
-//                kont_size++;
-//                flag = true;
-//            }
-//        }
-//        return flag;
-//    }
-
-
-    public void getALL(Entity entity){
-        if (this.level().isClientSide) return;
-        List<Entity> list = this.level().getEntitiesOfClass(Entity.class, entity.getBoundingBox().inflate(7.0D), KNOTABLE_PREDICATE)
+    public int fromALeash2B(Entity entityA, Entity entityB){
+        if (this.level().isClientSide) return 0;
+        int i = 0;
+        List<Entity> list = this.level().getEntitiesOfClass(Entity.class, entityA.getBoundingBox().inflate(7.0D), KNOTABLE_PREDICATE)
                 .stream().toList();
         for (Entity entity1 : list) {
-            if(entity1 == this) return;
+            if(entity1 == this) return 0;
             if(entity1 instanceof Mob mob && mob.getLeashHolder() == this){
-                mob.setLeashedTo(entity, true);
+                mob.setLeashedTo(entityB, true);
+                i ++;
             }else if(entity1 instanceof ChainNode node && node.getChainedNode() == this){
-                node.chainTo(entity);
+                node.chainTo(entityB);
+                i ++;
             }
         }
-    }
-
-    public void merge(List<Entity> entities){
-        if(this.level().isClientSide) return;
-        for (Entity entity: entities){
-            if (entity instanceof Mob mob) {
-                mob.setLeashedTo(this, true);
-                kont_size++;
-            }else if (entity instanceof ChainNode node){
-                node.chainTo(this);
-                kont_size++;
-            }
-        }
+        return i;
     }
 
 }

@@ -20,10 +20,10 @@ public  class ClientModEvents {
 //
 //    }
 
-    @SubscribeEvent
-    public static void RegisterRenders(EntityRenderersEvent.RegisterRenderers event){
-        event.registerEntityRenderer(ChainImprove.CHAIN_KNOT_ENTITY.get(), ChainKnotEntityRenderer::new);
-    }
+//    @SubscribeEvent
+//    public static void RegisterRenders(EntityRenderersEvent.RegisterRenderers event){
+//        event.registerEntityRenderer(ChainImprove.CHAIN_KNOT_ENTITY.get(), ChainKnotEntityRenderer::new);
+//    }
 
 
 

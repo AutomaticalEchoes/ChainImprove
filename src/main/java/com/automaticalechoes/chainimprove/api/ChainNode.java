@@ -2,12 +2,15 @@ package com.automaticalechoes.chainimprove.api;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,20 +37,55 @@ public interface ChainNode {
         }
     }
 
+    default void close2Node(Entity thos){
+        Entity chainedNode = this.getChainedNode();
+        Vec3 subtract = chainedNode.position().subtract(thos.position());
+        double length = subtract.length();
+        Vec3 vec = subtract.normalize();
+        if(length < 2) return;
+        Vec3 nodeVec = chainedNode.getDeltaMovement();
+        double v1 = nodeVec.length();
+        double cos = nodeVec.dot(vec) /(length * v1);
+        if(!thos.level().isClientSide ){
+            if(length > 24){
+                breakChain(thos, true);
+                return;
+            }else {
+                chainedNode.addDeltaMovement(chainedNode.getDeltaMovement().scale(- 0.1));
+            }
+        }
+        double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
+        Vec3 v = vec.scale(f);
+        thos.setDeltaMovement(v);
+    }
+
     default void writeNode(CompoundTag compoundTag){
         if(this.getChainedNode() != null){
             compoundTag.putUUID(NODE_UUID,this.getChainedNode().getUUID());
         }
     }
 
+    default void breakChain(Entity entity, boolean shouldNodePlaySound){
+        if(shouldNodePlaySound){
+            getChainedNode().playSound(SoundEvents.CHAIN_BREAK);
+        }
+        resetNode();
+        entity.playSound(SoundEvents.CHAIN_BREAK);
+        entity.spawnAtLocation(Items.CHAIN);
+    }
+
     default boolean interactNode(Player p_38330_, InteractionHand p_38331_, Entity thos) {
         ItemStack itemInHand = p_38330_.getItemInHand(p_38331_);
         boolean validItem = itemInHand.isEmpty() || itemInHand.is(Items.CHAIN);
-        if(this.getChainedNode() != null && ((this.getChainedNode() == p_38330_ && validItem) || itemInHand.is(Items.SHEARS))){
-            resetNode();
-            thos.playSound(SoundEvents.CHAIN_BREAK);
-            thos.spawnAtLocation(Items.CHAIN);
-            return true;
+        if(this.getChainedNode() != null){
+            if((this.getChainedNode() == p_38330_ && validItem) || itemInHand.is(Items.SHEARS)){
+                breakChain(thos, false);
+                return true;
+            }else if (this.getChainedNode() instanceof LeashFenceKnotEntity knotEntity && validItem){
+                chainTo(p_38330_);
+                ((ILeashFenceKnotEntity)knotEntity).shrunk();
+                return true;
+            }
         }else if(this.getChainedNode() == null){
             if(validItem && ChainNode.bindChainedNode(p_38330_,p_38330_.level(),thos)){
                 return true;

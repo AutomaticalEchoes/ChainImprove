@@ -8,7 +8,10 @@
   "mixins": [
     "BoatMixin",
     "ChainBlockMixin",
-    "FenceBlockMixin"
+    "FenceBlockMixin",
+    "LeashFenceKnotEntityMixin",
+    "AbstractMinecartMixin",
+    "MobMixin"
   ],
   "client": [
     "BoatRenderMixin"

@@ -1,17 +1,11 @@
 package com.automaticalechoes.chainimprove.api;
 
-import com.automaticalechoes.chainimprove.common.ChainKnotEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -20,7 +14,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class ChainBlockItem extends BlockItem {
     public static Item CHAIN_OVERRIDE = new ChainBlockItem(Blocks.CHAIN,new Item.Properties());

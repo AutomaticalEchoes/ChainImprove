@@ -1,22 +1,19 @@
 package com.automaticalechoes.chainimprove.mixin;
 
 import com.automaticalechoes.chainimprove.api.ChainNode;
-import com.automaticalechoes.chainimprove.common.ChainKnotEntity;
+import com.automaticalechoes.chainimprove.api.ILeashFenceKnotEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Map;
 import java.util.UUID;
 
 @Mixin(Boat.class)
@@ -65,7 +61,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
     @Inject(method = "destroy" ,at = @At("RETURN"))
     public void destroy(DamageSource p_219862_, CallbackInfo ci){
         if(node != null){
-            chainBreak(false);
+            breakChain(this,false);
         }
     }
 
@@ -73,7 +69,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
     public void kill() {
         super.kill();
         if(node != null){
-            chainBreak(false);
+            breakChain(this,false);
         }
     }
 
@@ -87,11 +83,11 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 //        IRot(this.getDeltaMovement());
     }
 
-    @Inject(method = "tick" ,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;floatBoat()V", shift = At.Shift.AFTER))
-    public void beforeMove(CallbackInfo callbackInfo){
-
-    }
+//    @Inject(method = "tick" ,
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;floatBoat()V", shift = At.Shift.AFTER))
+//    public void beforeMove(CallbackInfo callbackInfo){
+//
+//    }
 
 
     @Override
@@ -152,32 +148,16 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
     }
     public void NodePull(){
         if(node != null){
-            Vec3 subtract = this.node.position().subtract(this.position());
-            double length = subtract.length();
-            Vec3 vec = subtract.normalize();
-            if(length < 2) return;
-            Vec3 nodeVec = node.getDeltaMovement();
-            double v1 = nodeVec.length();
-            double cos = nodeVec.dot(vec) /(length * v1);
-            if(!this.level().isClientSide ){
-                if(length > 24){
-                    chainBreak(true);
-                    return;
-                }else {
-                    node.addDeltaMovement(node.getDeltaMovement().scale(- 0.1));
-                }
-            }
-            double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
-            Vec3 v = vec.scale(f);
-            if(subtract.horizontalDistance() > 1) {
-                float yRotNeo = (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+            close2Node(this);
+            Vec3 v2 = this.getDeltaMovement();
+            if(v2.horizontalDistance() > 0.1) {
+                float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI)) - 90.0F;
                 if(this.getYRot() != yRotNeo){
                     float yRot = this.getYRot();
                     float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
                     this.setYRot(yRot + rot);
                 }
             }
-            this.setDeltaMovement(v);
         }
     }
 //    public void NodePull(){
@@ -223,13 +203,13 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 
     public void ServerNodeTick(){
         if(node != null && !node.isAlive()){
-            chainBreak(false);
+            breakChain(this, false);
             return;
         }
         if(node == null && this.nodeUuid != null) {
             Entity entity = ChainNode.searchEntity(level(), this, nodeUuid);
             if(entity == null) {
-                chainBreak(false);
+                breakChain(this, false);
             }else {
                 this.setNode(entity);
             }
@@ -237,19 +217,10 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
 
     }
 
-    public void chainBreak(boolean shouldNodePlaySound){
-        this.playSound(SoundEvents.CHAIN_BREAK);
-        if(shouldNodePlaySound){
-            node.playSound(SoundEvents.CHAIN_BREAK);
-        }
-        resetNode();
-        spawnAtLocation(Items.CHAIN);
-    }
-
     @Override
     public void resetNode() {
-        if(this.node instanceof ChainKnotEntity chainKnotEntity){
-            chainKnotEntity.discard();
+        if(this.node instanceof LeashFenceKnotEntity knotEntity){
+            ((ILeashFenceKnotEntity)knotEntity).shrunk();
         }
         this.node = null;
         this.nodeUuid = null;
@@ -262,6 +233,7 @@ public abstract class BoatMixin extends Entity implements ChainNode, PlayerRidea
         this.nodeUuid = entity != null ? entity.getUUID() : null;
         this.entityData.set(NODE_ID, entity != null ? entity.getId() : Integer.MIN_VALUE);
     }
+
 
 
     @Override
