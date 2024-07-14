@@ -21,7 +21,7 @@ public class IChainRender {
     public static final Vec3 AXIS_Y = new Vec3(0,1.0D,0);
     private static final ResourceLocation CHAIN = new ResourceLocation(ChainImprove.MODID,"textures/chain.png");
 
-    public static <E extends Entity> void renderChain(Boat p_115462_, float p_115463_, PoseStack p_115464_, MultiBufferSource p_115465_, E p_115466_) {
+    public static <E extends Entity> void renderChain(Entity p_115462_, float p_115463_, PoseStack p_115464_, MultiBufferSource p_115465_, E p_115466_) {
         p_115464_.pushPose();
         Vec3 vec3 = p_115466_.getRopeHoldPosition(p_115463_);
         double d0 = (double)(Mth.lerp(p_115463_, p_115462_.yRotO, p_115462_.getYRot()) * ((float)Math.PI / 180F)) + (Math.PI / 2D);

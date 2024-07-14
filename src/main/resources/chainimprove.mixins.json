@@ -6,14 +6,15 @@
   "refmap": "chainimprove.refmap.json",
   "plugin": "com.automaticalechoes.chainimprove.mixin.MixinPlugin",
   "mixins": [
+    "AbstractMinecartMixin",
     "BoatMixin",
     "ChainBlockMixin",
     "FenceBlockMixin",
     "LeashFenceKnotEntityMixin",
-    "AbstractMinecartMixin",
     "MobMixin"
   ],
   "client": [
+    "AbstractMinecartRenderMixin",
     "BoatRenderMixin"
   ],
   "injectors": {

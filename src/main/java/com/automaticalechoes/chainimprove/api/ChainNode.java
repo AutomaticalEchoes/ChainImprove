@@ -1,6 +1,9 @@
 package com.automaticalechoes.chainimprove.api;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -23,6 +26,7 @@ public interface ChainNode {
     String NODE_UUID = "follow_node";
     void setNodeUuid(UUID uuid);
     UUID getNodeUuid();
+    int getNodeId();
     void setNode(Entity node);
     Entity getChainedNode();
     void resetNode();
@@ -35,28 +39,6 @@ public interface ChainNode {
         if(compoundTag.contains(NODE_UUID)){
             this.setNodeUuid(compoundTag.getUUID(NODE_UUID));
         }
-    }
-
-    default void close2Node(Entity thos){
-        Entity chainedNode = this.getChainedNode();
-        Vec3 subtract = chainedNode.position().subtract(thos.position());
-        double length = subtract.length();
-        Vec3 vec = subtract.normalize();
-        if(length < 2) return;
-        Vec3 nodeVec = chainedNode.getDeltaMovement();
-        double v1 = nodeVec.length();
-        double cos = nodeVec.dot(vec) /(length * v1);
-        if(!thos.level().isClientSide ){
-            if(length > 24){
-                breakChain(thos, true);
-                return;
-            }else {
-                chainedNode.addDeltaMovement(chainedNode.getDeltaMovement().scale(- 0.1));
-            }
-        }
-        double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
-        Vec3 v = vec.scale(f);
-        thos.setDeltaMovement(v);
     }
 
     default void writeNode(CompoundTag compoundTag){
@@ -124,4 +106,59 @@ public interface ChainNode {
         return null;
     }
 
+    default void ClientNodeTick(ClientLevel clientLevel){
+        int id = getNodeId();
+        if(id == Integer.MIN_VALUE){
+            resetNode();
+        }else if(getChainedNode() == null || getChainedNode().getId() != id){
+            Entity entity = clientLevel.getEntity(id);
+            this.setNode(entity);
+        }
+    }
+
+    default void ServerNodeTick(ServerLevel serverLevel, Entity thos){
+        if(getChainedNode() != null && !getChainedNode().isAlive()){
+            breakChain(thos, false);
+            return;
+        }
+        if(getChainedNode() == null && getNodeUuid() != null) {
+            Entity entity = ChainNode.searchEntity(serverLevel, thos, getNodeUuid());
+            if(entity == null) {
+                breakChain(thos, false);
+            }else {
+                this.setNode(entity);
+            }
+        }
+
+    }
+
+    default void close2Node(Entity thos){
+        Entity chainedNode = this.getChainedNode();
+        Vec3 subtract = chainedNode.position().subtract(thos.position());
+        double length = subtract.length();
+        Vec3 vec = subtract.normalize();
+        if(length < 2) return;
+        Vec3 nodeVec = chainedNode.getDeltaMovement();
+        double v1 = nodeVec.length();
+        double cos = nodeVec.dot(vec) /(length * v1);
+        if(!thos.level().isClientSide ){
+            if(length > 24){
+                breakChain(thos, true);
+                return;
+            }else {
+                chainedNode.addDeltaMovement(chainedNode.getDeltaMovement().scale(- 0.1));
+            }
+        }
+        double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
+        Vec3 v = vec.scale(f);
+        thos.setDeltaMovement(v);
+    }
+
+    default void nodeTick(Level level, Entity thos){
+        if(level instanceof ClientLevel clientLevel)
+            ClientNodeTick(clientLevel);
+        else if(level instanceof ServerLevel serverLevel)
+            ServerNodeTick(serverLevel, thos);
+        if(getChainedNode() != null) close2Node(thos);
+    }
 }

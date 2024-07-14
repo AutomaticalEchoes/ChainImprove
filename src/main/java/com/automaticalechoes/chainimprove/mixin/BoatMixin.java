@@ -75,12 +75,7 @@ public abstract class BoatMixin extends Entity implements ChainNode {
 
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo callbackInfo){
-        if(level().isClientSide)
-            ClientNodeTick();
-        else
-            ServerNodeTick();
-        NodePull();
-//        IRot(this.getDeltaMovement());
+        nodeTick(level(), this);
     }
 
 //    @Inject(method = "tick" ,
@@ -111,6 +106,12 @@ public abstract class BoatMixin extends Entity implements ChainNode {
     public void setNodeUuid(UUID uuid) {
         this.nodeUuid = uuid;
     }
+
+    @Override
+    public int getNodeId() {
+        return entityData.get(NODE_ID);
+    }
+
     public void NodePull(){
         if(node != null){
             close2Node(this);
@@ -124,62 +125,6 @@ public abstract class BoatMixin extends Entity implements ChainNode {
                 }
             }
         }
-    }
-//    public void NodePull(){
-//        if(node != null){
-//            Vec3 subtract = this.node.position().subtract(this.position());
-//            double length = subtract.length();
-//            double v1 = this.getDeltaMovement().length();
-//            double v2 = node.getDeltaMovement().length();
-//            if(length < 1) return;
-//            if(!this.level().isClientSide && length > 24 + 12 * v2){
-//                if(v2 > 1.5){
-//                    chainBreak(true);
-//                    return;
-//                }else {
-//                    node.addDeltaMovement(node.getDeltaMovement().scale(- 0.1));
-//                }
-//
-//            }
-//            double f = 0.06D + length / 100 + (v2 - v1) ;
-//            Vec3 v = subtract.normalize().scale(f);
-//            if(subtract.horizontalDistance() > 4) {
-//                float yRotNeo =  (float) (Mth.atan2(subtract.z, subtract.x) * (double) (180F / (float) Math.PI)) - 90.0F;
-//                if(this.getYRot() != yRotNeo){
-//                    float yRot = this.getYRot();
-//                    float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
-//                    this.setYRot(yRot + rot);
-//                }
-//            }
-//
-//            this.setDeltaMovement(getDeltaMovement().add(v));
-//        }
-//    }
-
-    public void ClientNodeTick(){
-        int id = entityData.get(NODE_ID);
-        if(id == Integer.MIN_VALUE){
-            resetNode();
-        }else if(this.node == null || node.getId() != id){
-            Entity entity = this.level().getEntity(id);
-            this.setNode(entity);
-        }
-    }
-
-    public void ServerNodeTick(){
-        if(node != null && !node.isAlive()){
-            breakChain(this, false);
-            return;
-        }
-        if(node == null && this.nodeUuid != null) {
-            Entity entity = ChainNode.searchEntity(level(), this, nodeUuid);
-            if(entity == null) {
-                breakChain(this, false);
-            }else {
-                this.setNode(entity);
-            }
-        }
-
     }
 
     @Override
@@ -199,28 +144,8 @@ public abstract class BoatMixin extends Entity implements ChainNode {
         this.entityData.set(NODE_ID, entity != null ? entity.getId() : Integer.MIN_VALUE);
     }
 
-
-
     @Override
     public @Nullable Entity getChainedNode() {
         return this.node;
     }
-    //    public void IRot(Vec3 p_20034_) {
-//        boolean flag = this.status == Boat.Status.IN_WATER || this.status == Boat.Status.ON_LAND;
-//        if(p_20034_.length() > 0.08F){
-//            double d0 = p_20034_.x;
-//            double d1 = p_20034_.y;
-//            double d2 = p_20034_.z;
-//            double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-//            float xRot = Mth.wrapDegrees((float) (-(Mth.atan2(d1, d3) * (double) (180F / (float) Math.PI))));
-//            this.lerpXRot = - xRot;
-//        }else if(flag){
-//            this.lerpXRot = 0;
-//        }
-//
-//        float xRot = this.getXRot();
-//        if(!flag){
-//            this.setXRot((float) (xRot + ((lerpXRot - xRot) / 20)));
-//        }
-//    }
 }

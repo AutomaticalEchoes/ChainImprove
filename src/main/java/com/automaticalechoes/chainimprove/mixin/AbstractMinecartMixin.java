@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -62,6 +64,11 @@ public abstract class AbstractMinecartMixin extends Entity implements ChainNode 
     }
 
     @Override
+    public int getNodeId() {
+        return entityData.get(NODE_ID);
+    }
+
+    @Override
     public void setNode(@Nullable Entity entity) {
         this.node = entity;
         this.nodeUuid = entity != null ? entity.getUUID() : null;
@@ -90,7 +97,36 @@ public abstract class AbstractMinecartMixin extends Entity implements ChainNode 
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci){
-        if(node != null) close2Node(this);
+        nodeTick(level(), this);
+        Vec3 v2 = this.getDeltaMovement();
+        if(v2.horizontalDistance() > 0.1) {
+            float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+            if(this.getYRot() != yRotNeo){
+                float yRot = this.getYRot();
+                float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
+                this.setYRot(yRot + rot);
+            }
+        }
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
+        if(node != null){
+            breakChain(this,false);
+        }
+    }
+
+    @Override
+    protected Vec3 getLeashOffset() {
+        return new Vec3(this.getBbWidth() * 0.6F, (double)this.getBbHeight() * 0.5D, 0F);
+    }
+
+    @Override
+    public Vec3 getRopeHoldPosition(float p_36374_) {
+//        float f = Mth.lerp(p_36374_ * 0.5F, this.getXRot(), this.xRotO) * ((float)Math.PI / 180F);
+        float f1 = Mth.lerp(p_36374_, this.yRotO, this.getYRot()) * ((float)Math.PI / 180F);
+        return this.getPosition(p_36374_).add(new Vec3(- this.getBbWidth() * 0.6F, (double)this.getBbHeight() * 0.5D, 0F).yRot(-f1));
     }
 
     @Inject(method = "moveMinecartOnRail", at = {@At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;")}, locals = LocalCapture.CAPTURE_FAILEXCEPTION)
