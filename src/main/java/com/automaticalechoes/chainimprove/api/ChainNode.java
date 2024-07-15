@@ -135,21 +135,21 @@ public interface ChainNode {
     default void close2Node(Entity thos){
         Entity chainedNode = this.getChainedNode();
         Vec3 subtract = chainedNode.position().subtract(thos.position());
-        double length = subtract.length();
+        double distance = subtract.length();
         Vec3 vec = subtract.normalize();
-        if(length < 2) return;
+        if(distance < 1) return;
         Vec3 nodeVec = chainedNode.getDeltaMovement();
-        double v1 = nodeVec.length();
-        double cos = nodeVec.dot(vec) /(length * v1);
+//        double v1 = nodeVec.length();
+        double dotV = nodeVec.dot(vec);
         if(!thos.level().isClientSide ){
-            if(length > 24){
+            if(distance > 24){
                 breakChain(thos, true);
                 return;
             }else {
                 chainedNode.addDeltaMovement(chainedNode.getDeltaMovement().scale(- 0.1));
             }
         }
-        double f = 0.06 * length + Mth.clamp(cos != 0 ? 1 / cos : 1 , 0, 2) * v1;
+        double f = 0.675 * Math.max(distance - 1, 0) + dotV  ;
         Vec3 v = vec.scale(f);
         thos.setDeltaMovement(v);
     }

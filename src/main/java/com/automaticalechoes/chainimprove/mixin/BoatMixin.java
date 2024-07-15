@@ -76,14 +76,16 @@ public abstract class BoatMixin extends Entity implements ChainNode {
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo callbackInfo){
         nodeTick(level(), this);
+        Vec3 v2 = this.getDeltaMovement();
+        if(v2.horizontalDistance() > 0.1) {
+            float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+            if(this.getYRot() != yRotNeo){
+                float yRot = this.getYRot();
+                float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
+                this.setYRot(yRot + rot);
+            }
+        }
     }
-
-//    @Inject(method = "tick" ,
-//            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;floatBoat()V", shift = At.Shift.AFTER))
-//    public void beforeMove(CallbackInfo callbackInfo){
-//
-//    }
-
 
     @Override
     protected Vec3 getLeashOffset() {
@@ -112,20 +114,6 @@ public abstract class BoatMixin extends Entity implements ChainNode {
         return entityData.get(NODE_ID);
     }
 
-    public void NodePull(){
-        if(node != null){
-            close2Node(this);
-            Vec3 v2 = this.getDeltaMovement();
-            if(v2.horizontalDistance() > 0.1) {
-                float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI)) - 90.0F;
-                if(this.getYRot() != yRotNeo){
-                    float yRot = this.getYRot();
-                    float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
-                    this.setYRot(yRot + rot);
-                }
-            }
-        }
-    }
 
     @Override
     public void resetNode() {

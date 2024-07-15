@@ -100,7 +100,7 @@ public abstract class AbstractMinecartMixin extends Entity implements ChainNode 
         nodeTick(level(), this);
         Vec3 v2 = this.getDeltaMovement();
         if(v2.horizontalDistance() > 0.1) {
-            float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI)) - 90.0F;
+            float yRotNeo = (float) (Mth.atan2(v2.z, v2.x) * (double) (180F / (float) Math.PI));
             if(this.getYRot() != yRotNeo){
                 float yRot = this.getYRot();
                 float rot = Mth.wrapDegrees(yRotNeo - yRot) / 5;
@@ -129,8 +129,4 @@ public abstract class AbstractMinecartMixin extends Entity implements ChainNode 
         return this.getPosition(p_36374_).add(new Vec3(- this.getBbWidth() * 0.6F, (double)this.getBbHeight() * 0.5D, 0F).yRot(-f1));
     }
 
-    @Inject(method = "moveMinecartOnRail", at = {@At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;")}, locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    public void moveOnRail(BlockPos pos, CallbackInfo ci, AbstractMinecart mc, double d24, double d25){
-
-    }
 }
