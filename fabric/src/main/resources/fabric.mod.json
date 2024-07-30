@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "chaintest",
+  "version": "${version}",
+
+  "name": "ChainTest",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "All Rights Reserved",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "automaticalechoes.equipset.chaintest.fabric.ChainTestFabric"
+    ]
+  },
+  "mixins": [
+    "chaintest.mixins.json",
+    "chaintest-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.20.1"
+  }
+}

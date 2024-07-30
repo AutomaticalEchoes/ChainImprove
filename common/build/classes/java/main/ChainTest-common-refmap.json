@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "automaticalechoes/equipset/chaintest/mixin/BoatMixin": {
+      "interact": "Lnet/minecraft/class_1690;method_5688(Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;)Lnet/minecraft/class_1269;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "automaticalechoes/equipset/chaintest/mixin/BoatMixin": {
+        "interact": "Lnet/minecraft/class_1690;method_5688(Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;)Lnet/minecraft/class_1269;"
+      }
+    }
+  }
+}

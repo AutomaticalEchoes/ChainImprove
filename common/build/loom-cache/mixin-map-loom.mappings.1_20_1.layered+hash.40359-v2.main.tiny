@@ -1,0 +1,3 @@
+v1	named	intermediary
+METHOD	automaticalechoes/equipset/chaintest/mixin/BoatMixin	(DDDFFIZ)V	lerpTo	method_5759
+METHOD	automaticalechoes/equipset/chaintest/mixin/BoatMixin	()V	tick	method_5773
