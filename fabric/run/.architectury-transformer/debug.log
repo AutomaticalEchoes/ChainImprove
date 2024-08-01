@@ -113,33 +113,3 @@
 [Architectury Transformer DEBUG]  - C:\Users\Acer\Desktop\ChainTest\.gradle\loom-cache\remapped_mods\loom_mappings_1_20_1_layered_hash_40359_v2\net\fabricmc\fabric-api\fabric-resource-loader-v0\0.11.10+1802ada577\fabric-resource-loader-v0-0.11.10+1802ada577.jar
 [Architectury Transformer DEBUG]  - C:\Users\Acer\Desktop\ChainTest\.gradle\loom-cache\remapped_mods\loom_mappings_1_20_1_layered_hash_40359_v2\net\fabricmc\fabric-api\fabric-sound-api-v1\1.0.13+1802ada577\fabric-sound-api-v1-1.0.13+1802ada577.jar
 [Architectury Transformer DEBUG]  - C:\Users\Acer\Desktop\ChainTest\.gradle\loom-cache\remapped_mods\loom_mappings_1_20_1_layered_hash_40359_v2\net\fabricmc\fabric-api\fabric-transitive-access-wideners-v1\4.3.1+1802ada577\fabric-transitive-access-wideners-v1-4.3.1+1802ada577.jar
-[Architectury Transformer] Read classpath in 1.280 s
-[Architectury Transformer DEBUG] Closed File Systems for C:\Users\Acer\Desktop\ChainTest\common\build\devlibs\ChainTest-1-dev.jar
-[Architectury Transformer DEBUG] Transforming 5 transformer(s) from C:\Users\Acer\Desktop\ChainTest\common\build\devlibs\ChainTest-1-dev.jar to C:\Users\Acer\AppData\Local\Temp\7759710867038018152.jar: 
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RuntimeMixinRefmapDetector@74a10858
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.GenerateFakeFabricMod@23fe1d71
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@28ac3dc3
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@32eebfca
-[Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@4e718207
-[Architectury Transformer DEBUG] Transforming from C:\Users\Acer\Desktop\ChainTest\common\build\devlibs\ChainTest-1-dev.jar to C:\Users\Acer\AppData\Local\Temp\7759710867038018152.jar with 5 transformer(s) on dev.architectury.transformer.handler.SimpleTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainEntity with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainEntityRender with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainTest with maxs=true frames=true
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/mixin/BoatMixin with maxs=true frames=true
-[Architectury Transformer DEBUG] Checking whether /ChainTest-common-refmap.json is a mixin config.
-[Architectury Transformer DEBUG] Checking whether /chaintest-common.mixins.json is a mixin config.
-[Architectury Transformer DEBUG] Closed File Systems for C:\Users\Acer\AppData\Local\Temp\7759710867038018152.jar
-[Architectury Transformer] Listening at C:\Users\Acer\Desktop\ChainTest\common\build\devlibs\ChainTest-1-dev.jar
-[Architectury Transformer DEBUG] Transforming from automaticalechoes/equipset/chaintest/ChainEntity.class to automaticalechoes/equipset/chaintest/ChainEntity.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainEntity with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed automaticalechoes/equipset/chaintest/ChainEntity in 1.189 ms
-[Architectury Transformer DEBUG] Transforming from automaticalechoes/equipset/chaintest/ChainTest.class to automaticalechoes/equipset/chaintest/ChainTest.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainTest with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed automaticalechoes/equipset/chaintest/ChainTest in 754.9 μs
-[Architectury Transformer DEBUG] Transforming from automaticalechoes/equipset/chaintest/ChainEntityRender.class to automaticalechoes/equipset/chaintest/ChainEntityRender.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing automaticalechoes/equipset/chaintest/ChainEntityRender with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed automaticalechoes/equipset/chaintest/ChainEntityRender in 646.9 μs
