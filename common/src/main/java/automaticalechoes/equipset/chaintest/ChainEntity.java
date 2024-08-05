@@ -40,22 +40,29 @@ public class ChainEntity extends Entity {
         if(RightNode == null && entityData.get(NODE_2_ID) != Integer.MIN_VALUE){
             this.RightNode = level().getEntity(entityData.get(NODE_2_ID));
         }
-        if(LeftNode != null && RightNode !=null){
-            if(LeftNode.getType().equals(EntityType.LEASH_KNOT) || RightNode.getType().equals(EntityType.LEASH_KNOT)){
-                return;
-            }
-            Vec3 subtract = LeftNode.position().subtract(RightNode.position());
-            length = subtract.length();
-            Vec3 v1 = LeftNode.getDeltaMovement();
-            Vec3 v2 = RightNode.getDeltaMovement();
-            this.setPos(RightNode.position().add(subtract.scale(0.5)));
-            if (v2.normalize().dot(v1.normalize()) > 0.8 && Math.abs(v2.length() - v1.length()) < 0.2) return;
-            Vec3 merge = v2.add(v1);
-            this.setDeltaMovement(merge);
-            LeftNode.setDeltaMovement(v1.lerp(merge, 0.5));
-            RightNode.setDeltaMovement(v2.lerp(merge,0.5));
+        if(LeftNode == null || RightNode ==null) return;
+        if(LeftNode.getType().equals(EntityType.LEASH_KNOT) || RightNode.getType().equals(EntityType.LEASH_KNOT)){
+            return;
         }
+        Vec3 subtract = LeftNode.position().subtract(RightNode.position());
+        length = subtract.length();
+        Vec3 v1 = LeftNode.getDeltaMovement();
+        Vec3 v2 = RightNode.getDeltaMovement();
+        Vec3 v11 = getV(length, size, subtract, v2, v1);
+        this.setPos(RightNode.position());
+
+        RightNode.setDeltaMovement(v11);
+        this.setDeltaMovement(v11);
     }
+
+    public Vec3 getV(double length, double size, Vec3 sub, Vec3 selfV , Vec3 v2){
+        if(length > size){
+            if(length < size + 1) return selfV.lerp(v2, length - size + 1);
+            return v2.add(sub.normalize().scale(length - size));
+        }
+        return selfV;
+    }
+
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
