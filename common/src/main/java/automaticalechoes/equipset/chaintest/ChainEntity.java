@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -24,8 +25,7 @@ public class ChainEntity extends Entity {
     private static final EntityDataAccessor<Integer> NODE_2_ID = SynchedEntityData.defineId(ChainEntity.class, EntityDataSerializers.INT);
     private Entity LeftNode;
     private Entity RightNode;
-    private int size;
-    private double length;
+    private double size = 1;
 
     public ChainEntity(EntityType<?> p_19870_, Level p_19871_) {
         super(ChainTest.CHAIN_ENTITY, p_19871_);
@@ -45,24 +45,23 @@ public class ChainEntity extends Entity {
             return;
         }
         Vec3 subtract = LeftNode.position().subtract(RightNode.position());
-        length = subtract.length();
+        double length = subtract.length();
         Vec3 v1 = LeftNode.getDeltaMovement();
         Vec3 v2 = RightNode.getDeltaMovement();
-        Vec3 v11 = getV(length, size, subtract, v2, v1);
+        Vec3 v11 = getV(length, size, subtract, v2, v1, (RightNode.getBbWidth()  + LeftNode.getBbWidth() )/ 2);
         this.setPos(RightNode.position());
 
         RightNode.setDeltaMovement(v11);
         this.setDeltaMovement(v11);
     }
 
-    public Vec3 getV(double length, double size, Vec3 sub, Vec3 selfV , Vec3 v2){
-        if(length > size){
-            if(length < size + 1) return selfV.lerp(v2, length - size + 1);
-            return v2.add(sub.normalize().scale(length - size));
+    public Vec3 getV(double length, double size, Vec3 sub, Vec3 selfV , Vec3 mergeV, double hBbWidth){
+        if(length > size + hBbWidth){
+            if(length < size + 1 + hBbWidth) return selfV.lerp(mergeV, Math.max(length - size , 1) );
+            return mergeV.add(sub.normalize().scale(Mth.lerp(1.0D, length - size - hBbWidth, (length - size - hBbWidth) / length )));
         }
-        return selfV;
+        return selfV.lerp(mergeV, 1);
     }
-
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
